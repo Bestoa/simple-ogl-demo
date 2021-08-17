@@ -7,12 +7,15 @@
 
 #include "shader.h"
 #include "objs.h"
+#include "fbo.h"
 
 using namespace std;
 using namespace glm;
 
 #define WIDTH (1280)
 #define HEIGHT (720)
+
+#define RENDER_TO_TEXTURE 1
 
 TRObj *create_floor()
 {
@@ -121,6 +124,35 @@ int main()
 
     mat4 floor_model_mat4 = mat4(1.0f);
 
+#if RENDER_TO_TEXTURE
+    // Create FBO
+    TRfbo *fbo = new TRfbo(WIDTH, HEIGHT);
+    fbo->unuse();
+
+    // The fullscreen quad's FBO
+    GLuint quad_vao;
+    glGenVertexArrays(1, &quad_vao);
+    glBindVertexArray(quad_vao);
+    static const GLfloat g_quad_vertex_buffer_data[] = {
+        -1.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        1.0f,  1.0f, 0.0f,
+    };
+
+    GLuint quad_vertexbuffer;
+    glGenBuffers(1, &quad_vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glBindVertexArray(0);
+
+    Shader quad_shader("shaders/quad.vert", "shaders/quad.frag");
+#endif
+
     int frame = 0;
     while (!glfwWindowShouldClose(window))
     {
@@ -145,6 +177,13 @@ int main()
         shader.setVec3("light.position", light_pos);
 #endif
 
+#if RENDER_TO_TEXTURE
+        fbo->use();
+        shader.use();
+        glEnable(GL_DEPTH_TEST);
+        glViewport(0, 0, WIDTH, HEIGHT);
+#endif
+
         shader.setMat4("model_mat", model_mat);
         shader.setMat4("view_mat", view_mat);
         shader.setMat4("projection_mat", projection_mat);
@@ -152,6 +191,7 @@ int main()
         mat4 normal_mat = transpose(inverse(view_mat * model_mat));
         shader.setMat4("normal_mat", normal_mat);
 
+        glClearColor( 0.1f, 0.1f, 0.1f, 1.0f);
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
         obj->drawMesh(shader);
@@ -159,12 +199,35 @@ int main()
         shader.setMat4("model_mat", floor_model_mat4);
         floor->drawMesh(shader);
 
+#if RENDER_TO_TEXTURE
+        fbo->unuse();
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDisable(GL_DEPTH_TEST);
+
+        quad_shader.use();
+        glClearColor( 1.0f, 1.0f, 1.0f, 1.0f);
+        glClear( GL_COLOR_BUFFER_BIT );
+        glBindVertexArray(quad_vao);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, fbo->getRenderTexture());
+
+        quad_shader.setInt("renderedTexture", 0);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glViewport(0, 0, WIDTH/5, HEIGHT/5);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+#endif
+
         glfwSwapBuffers(window);
         glfwPollEvents();
 
         frame++;
     }
 
+#if RENDER_TO_TEXTURE
+    delete fbo;
+#endif
     delete obj;
     delete floor;
 

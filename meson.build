@@ -9,6 +9,7 @@ incdir = include_directories('include')
 executable('model-renderer',
            'main.cpp',
            'objs.cpp',
+           'fbo.cpp',
            'lib/glad.c',
            dependencies : [
              gfx_dep,
