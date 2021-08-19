@@ -88,13 +88,13 @@ int main()
     }
 
     TRObj *floor = create_floor();
-    TRObj *obj = new TRObj("1.obj");
+    TRObj *obj = new TRObj("res/jinx.obj");
     if (!obj || obj->fail())
     {
         cout << "Create OBJ failed." << endl;
         return -1;
     }
-    obj->loadTexture("1.tga", TEXTURE_DIFFUSE);
+    obj->loadTexture("res/jinx.tga", TEXTURE_DIFFUSE);
     obj->loadDummyTexture(TEXTURE_SPECULAR);
 
     Shader shader("shaders/obj.vert", "shaders/obj.frag");
