@@ -201,7 +201,6 @@ int main()
 
 #if RENDER_TO_TEXTURE
         fbo->unuse();
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDisable(GL_DEPTH_TEST);
 
         quad_shader.use();
