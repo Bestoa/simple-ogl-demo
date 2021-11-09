@@ -66,6 +66,7 @@ TRObj::TRObj(VertexData *vertices, size_t size)
 
     mNumVertices = size;
     __create_mesh__(vertices);
+    mName = "anon_obj";
 }
 
 
@@ -83,11 +84,12 @@ TRObj::TRObj(const char *obj_name)
     __create_mesh__(vertices);
     // Do not forget to free it.
     delete [] vertices;
+    mName = obj_name;
 }
 
 TRObj::~TRObj()
 {
-    cout << "Desotry TRObj." << endl;
+    cout << "Desotry TRObj " << mName << endl;
     if (mFail)
         return;
     glDeleteBuffers(1, &mVBO);

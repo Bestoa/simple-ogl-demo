@@ -2,6 +2,7 @@
 #define __OBJS__
 
 #include <iostream>
+#include <string>
 #include <glad/gl.h>
 #include "shader.h"
 
@@ -45,6 +46,7 @@ class TRObj
         bool drawMesh(Shader &shader);
 
     private:
+        std::string mName;
         GLuint mVAO;
         GLuint mVBO;
         GLuint mTextureID[TEXTURE_TYPENUM];
