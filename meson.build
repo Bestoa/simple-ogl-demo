@@ -10,7 +10,7 @@ executable('model-renderer',
            'main.cpp',
            'objs.cpp',
            'fbo.cpp',
-           'lib/glad.c',
+           'lib/gl.c',
            dependencies : [
              gfx_dep,
              dl_dep,

@@ -2,7 +2,7 @@
 #define __OBJS__
 
 #include <iostream>
-#include <glad/glad.h>
+#include <glad/gl.h>
 #include "shader.h"
 
 enum {
