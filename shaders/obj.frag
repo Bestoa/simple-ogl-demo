@@ -45,4 +45,5 @@ void main()
     float spec = pow(max(dot(n_view_dir, n_reflect_dir), 0.0), light.shininess);
     vec4 specular = texture(material.specular, texcoord) * spec * light.color;
     fColor += specular;
+    fColor.a = 1.0f;
 }
