@@ -12,8 +12,8 @@
 using namespace std;
 using namespace glm;
 
-#define WIDTH (1280)
-#define HEIGHT (720)
+#define WIDTH (3840)
+#define HEIGHT (2160)
 
 #define RENDER_TO_TEXTURE 1
 
@@ -128,29 +128,6 @@ int main()
     // Create FBO
     TRfbo *fbo = new TRfbo(WIDTH, HEIGHT);
     fbo->unuse();
-
-    // The fullscreen quad's FBO
-    GLuint quad_vao;
-    glGenVertexArrays(1, &quad_vao);
-    glBindVertexArray(quad_vao);
-    static const GLfloat g_quad_vertex_buffer_data[] = {
-        -1.0f, -1.0f, 0.0f,
-        1.0f, -1.0f, 0.0f,
-        -1.0f,  1.0f, 0.0f,
-        -1.0f,  1.0f, 0.0f,
-        1.0f, -1.0f, 0.0f,
-        1.0f,  1.0f, 0.0f,
-    };
-
-    GLuint quad_vertexbuffer;
-    glGenBuffers(1, &quad_vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glBindVertexArray(0);
-
-    Shader quad_shader("shaders/quad.vert", "shaders/quad.frag");
 #endif
 
     int frame = 0;
@@ -200,22 +177,9 @@ int main()
         floor->drawMesh(shader);
 
 #if RENDER_TO_TEXTURE
-        fbo->unuse();
-        glDisable(GL_DEPTH_TEST);
-
-        quad_shader.use();
-        glClearColor( 1.0f, 1.0f, 1.0f, 1.0f);
-        glClear( GL_COLOR_BUFFER_BIT );
-        glBindVertexArray(quad_vao);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, fbo->getRenderTexture());
-
-        quad_shader.setInt("renderedTexture", 0);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glViewport(0, 0, WIDTH/5, HEIGHT/5);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo->getFramebuffer());
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 #endif
 
         glfwSwapBuffers(window);

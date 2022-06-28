@@ -6,6 +6,7 @@ class TRfbo {
         ~TRfbo();
 
         GLuint getRenderTexture() { return mRenderedTexture; }
+        GLuint getFramebuffer() { return mFramebufferName; };
         bool fail() { return mFail; }
         void use() {
             glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferName);
